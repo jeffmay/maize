@@ -1,3 +1,4 @@
+from vector import v, vector
 
 ##################
 # Helper Methods #
@@ -6,7 +7,7 @@
 def location(point):
     try:
         x, y = point
-        return x, y
+        return v(x, y)
     except ValueError:
         raise ValueError("'%s' is not a valid (x, y) tuple" % point)
 
@@ -38,10 +39,10 @@ class DottedArenaSkin(Skin):
     BORDER_BOTTOM_RIGHT = '::'
 
 class Maze(object):
-    NORTH = ( 0, -1)
-    SOUTH = ( 0,  1)
-    EAST  = ( 1,  0)
-    WEST  = (-1,  0)
+    NORTH = v( 0, -1)
+    SOUTH = v( 0,  1)
+    EAST  = v( 1,  0)
+    WEST  = v(-1,  0)
     DIRECTIONS = [NORTH, SOUTH, EAST, WEST]
 
     INNER_TEMPLATE = '''{right_border_cell}\n{left_border_cell}'''
@@ -62,6 +63,10 @@ class Maze(object):
     def _contains(self, point):
         x, y = location(point)
         return x >= 0 and y >= 0 and x < self.cols and y < self.rows
+
+    def __iter__(self):
+        for row in self._board:
+            yield ''.join(row)
 
     def __getitem__(self, point):
         """Get the char at the given (x, y) point"""
@@ -85,7 +90,7 @@ class Maze(object):
         inner_bordered_rows = Maze.INNER_TEMPLATE.format(
                 left_border_cell=self.skin.BORDER_LEFT,
                 right_border_cell=self.skin.BORDER_RIGHT
-            ).join(''.join(row) for row in self._board)
+            ).join(self)
         # paste the inside between top and bottom borders
         return Maze.BORDER_TEMPLATE.format(
                 top_left_border=self.skin.BORDER_TOP_LEFT,
